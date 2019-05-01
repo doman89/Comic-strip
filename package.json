@@ -1,0 +1,26 @@
+{
+  "name": "comic-strip",
+  "version": "1.0.0",
+  "description": "Website for comics funs",
+  "main": "server.js",
+  "scripts": {
+    "run": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doman89/Comic-strip.git"
+  },
+  "author": "Mateusz Domański",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/doman89/Comic-strip/issues"
+  },
+  "homepage": "https://github.com/doman89/Comic-strip#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.0"
+  }
+}
