@@ -15,11 +15,11 @@ const UserSensitiveDataSchema = new Schema({
   gender: genderValidator,
   birthDate: birthDateValidator,
   profileID: String,
-  userRole: Number
+  userRole: Number,
   bio: String,
   country: String,
   city: String,
-  favouriteComicName: String,
+  favouriteComicName: String
 });
 
 UserSensitiveDataSchema.pre("save", bcrypt.securePassword);

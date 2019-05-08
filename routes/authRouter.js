@@ -40,14 +40,10 @@ router.get("/facebook", passport.authenticate("facebook"));
 router.get(
   "/facebook/redirect",
   passport.authenticate("facebook", {
-    successRedirect: "/",
-    failureRedirect: "/login",
     scope: ["email"],
     session: false
   }),
-  function(req, res) {
-    res.send("FACEBOOK is done!!! :D");
-  }
+  tokenController.makeToken
 );
 
 module.exports = router;

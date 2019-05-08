@@ -1,5 +1,4 @@
 const userSensitiveDataSchema = require("../database/models/userSensitiveDataSchema");
-const bcryptController = require("./../controllers/bcryptController");
 
 isUserExists = async (request, response) => {
   try {
@@ -26,7 +25,7 @@ module.exports = {
       next();
     }
   },
-  createNewUser: (request, response) => {
+  createNewUser: (request, response, next) => {
     const {
       emailAddress,
       userName,
@@ -34,26 +33,25 @@ module.exports = {
       gender,
       birthDate
     } = request.body;
+    const userRole = 0;
+    if (!password || !gender || !birthDate) {
+      response.status(400).json({ error: "Please type all required data!" });
+    }
     const user = new userSensitiveDataSchema({
       emailAddress,
       userName,
       password,
       gender,
-      birthDate
+      birthDate,
+      userRole
     });
     user
       .save()
-      .then(result => response.json({ id: result._id }))
+      .then(() => {
+        request.user = { emailAddress, userRole };
+        next();
+      })
       .catch(error => response.json({ error: error.message }));
-  },
-  logInUser: async (request, response, next) => {
-    if (await isUserExists(request, response)) {
-      bcryptController.checkPassword(request, response, next);
-    } else {
-      response
-        .status(404)
-        .json({ error: `User: ${request.body.emailAddress} doesn't exists.` });
-    }
   },
   configureLocalStrategy: {
     usernameField: "emailAddress",

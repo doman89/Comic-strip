@@ -8,6 +8,11 @@ const passwordValidator = [
        - minimum length 8 characters, 
        - at least one lower and upper case letter,
        - one number and one special character.`
+  }),
+  validate({
+    validator: "isLength",
+    arguments: 8,
+    message: "Password minimum lenght 8 characters is required."
   })
 ];
 

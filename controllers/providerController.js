@@ -20,7 +20,18 @@ module.exports = {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET
   },
-  handleLogInGoogleUser: async (accessToken, refreshToken, { _json }, done) => {
+  configureFacebookStrategy: {
+    callbackURL: process.env.FACEBOOK_CALLBACK_URL,
+    clientID: process.env.FACEBOOK_CLIENT_ID,
+    clientSecret: process.env.FACEBOOK_CLIENT_SECRECT,
+    profileFields: ["id", "displayName", "name", "gender", "emails"]
+  },
+  handleLogInProviderUser: async (
+    accessToken,
+    refreshToken,
+    { _json },
+    done
+  ) => {
     const user = await UserSensitiveDataSchema.findOne({
       emailAddress: _json.email
     });
