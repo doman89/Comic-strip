@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const userSensitiveDataSchema = require("./models/userSensitiveDataSchema");
+const { userRoleEnums } = require("./../controllers/roleController");
 
 const configConnectOptions = {
   useNewUrlParser: true,
@@ -13,8 +14,13 @@ module.exports = () => {
       console.log("Connection with database has been made.");
       userSensitiveDataSchema.countDocuments({}, (err, cnt) => {
         if (!cnt) {
-          //TODO: Create admin when database is empty
-          //     console.log("Database hasn't any record!");
+          const admin = new userSensitiveDataSchema({
+            emailAddress: "admin@admin.com",
+            userName: "Admin",
+            password: "Admin1234!",
+            userRole: userRoleEnums.ADMIN
+          });
+          admin.save().then(console.log("Admin account was created!"));
         }
       });
     })

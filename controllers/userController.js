@@ -1,4 +1,18 @@
 const userSensitiveDataSchema = require("../database/models/userSensitiveDataSchema");
+const { userRoleEnums } = require("./roleController");
+
+const userDataToShow = dataFromAPI => ({
+  _id: dataFromAPI._id,
+  emailAddress: dataFromAPI.emailAddress,
+  userName: dataFromAPI.userName,
+  gender: dataFromAPI.gender,
+  birthDate: dataFromAPI.birthDate,
+  userRole: dataFromAPI.userRole,
+  bio: dataFromAPI.bio,
+  country: dataFromAPI.country,
+  city: dataFromAPI.city,
+  favouriteComicName: dataFromAPI.favouriteComicName
+});
 
 isUserExists = async (request, response) => {
   try {
@@ -33,7 +47,6 @@ module.exports = {
       gender,
       birthDate
     } = request.body;
-    const userRole = 0;
     if (!password || !gender || !birthDate) {
       response.status(400).json({ error: "Please type all required data!" });
     }
@@ -43,12 +56,15 @@ module.exports = {
       password,
       gender,
       birthDate,
-      userRole
+      userRole: userRoleEnums.USER
     });
     user
       .save()
-      .then(() => {
-        request.user = { emailAddress, userRole };
+      .then(member => {
+        request.user = {
+          emailAddress: member.emailAddress,
+          userRole: member.userRole
+        };
         next();
       })
       .catch(error => response.json({ error: error.message }));
@@ -59,7 +75,6 @@ module.exports = {
   },
   handleLogInLocalUser: async (emailAddress, password, done) => {
     try {
-      console.log(emailAddress, password);
       const user = await userSensitiveDataSchema.findOne({ emailAddress });
       if (user) {
         done(null, user);
@@ -69,5 +84,20 @@ module.exports = {
     } catch (error) {
       done(error, null);
     }
+  },
+  getAllUsers: (request, response) => {
+    userSensitiveDataSchema.find({}).then(users => {
+      const usersList = users.map(user => userDataToShow(user));
+      response.json(usersList);
+    });
+  },
+  getUserProfile: (request, response) => {
+    userSensitiveDataSchema
+      .findOne({
+        _id: request.params.id
+      })
+      .then(user => {
+        response.json(userDataToShow(user));
+      });
   }
 };

@@ -7,24 +7,18 @@ module.exports = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: process.env.SECRET_PASSWORD
   },
-  handleUserAuthorization: async (payload, done) => {
-    try {
-      const { emailAddress } = payload;
-      const foundedUser = await userSensitiveDataSchema.findOne({
-        emailAddress
-      });
-      done(null, foundedUser);
-    } catch (error) {
-      done(error, null);
-    }
+  handleUserAuthorization: (payload, done) => {
+    const { _id } = payload;
+    userSensitiveDataSchema
+      .findOne({ _id })
+      .then(foundedUser => done(null, foundedUser))
+      .catch(error => done(error, null));
   },
-  makeToken: async (request, response) => {
-    const { emailAddress, userRole } = request.user;
-    const token = jwt.sign(
-      { emailAddress, userRole },
-      process.env.SECRET_PASSWORD,
-      { expiresIn: 1200 }
-    );
+  makeToken: (request, response) => {
+    const { _id, userRole } = request.user;
+    const token = jwt.sign({ _id, userRole }, process.env.SECRET_PASSWORD, {
+      expiresIn: 1200
+    });
     response.json({ token: `Bearer ${token}` });
   }
 };

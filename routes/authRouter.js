@@ -6,14 +6,6 @@ const tokenController = require("../controllers/tokenController");
 const router = express.Router();
 
 router.get(
-  "/jwt",
-  passport.authenticate("jwt", { session: false }),
-  (request, response) => {
-    response.send("I'am authorized!");
-  }
-);
-
-router.get(
   "/",
   passport.authenticate("local", { session: false }),
   tokenController.makeToken
@@ -36,7 +28,6 @@ router.get(
 );
 
 router.get("/facebook", passport.authenticate("facebook"));
-
 router.get(
   "/facebook/redirect",
   passport.authenticate("facebook", {
