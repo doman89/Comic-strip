@@ -1,20 +1,21 @@
 const userSensitiveDataSchema = require("../database/models/userSensitiveDataSchema");
+const bcrypt = require("bcrypt");
 const { userRoleEnums } = require("./roleController");
 
 const userDataToShow = dataFromAPI => ({
-  _id: dataFromAPI._id,
-  emailAddress: dataFromAPI.emailAddress,
-  userName: dataFromAPI.userName,
-  gender: dataFromAPI.gender,
-  birthDate: dataFromAPI.birthDate,
-  userRole: dataFromAPI.userRole,
-  bio: dataFromAPI.bio,
-  country: dataFromAPI.country,
-  city: dataFromAPI.city,
-  favouriteComicName: dataFromAPI.favouriteComicName
+  _id: dataFromAPI._id !== void(0) ? dataFromAPI._id : null,
+  emailAddress: dataFromAPI.emailAddress !== void(0) ? dataFromAPI.emailAddress : null,
+  userName: dataFromAPI.userName !== void(0) ? dataFromAPI.userName : null,
+  gender: dataFromAPI.gender !== void(0) ? dataFromAPI.gender : null,
+  birthDate: dataFromAPI.birthDate !== void(0) ? dataFromAPI.birthDate : null,
+  userRole: dataFromAPI.userRole !== void(0) ? dataFromAPI.userRole : null,
+  bio: dataFromAPI.bio !== void(0) ? dataFromAPI.bio : null,
+  country: dataFromAPI.country !== void(0) ? dataFromAPI.country : null,
+  city: dataFromAPI.city !== void(0) ? dataFromAPI.city : null,
+  favouriteComicName: dataFromAPI.favouriteComicName !== void(0) ? dataFromAPI.favouriteComicName : null,
 });
 
-isUserExists = async (request, response) => {
+const isUserExists = async (request, response) => {
   try {
     const { emailAddress } = request.body;
     const foundedUser = await userSensitiveDataSchema.findOne({
@@ -77,7 +78,11 @@ module.exports = {
     try {
       const user = await userSensitiveDataSchema.findOne({ emailAddress });
       if (user) {
-        done(null, user);
+        if(user.password){
+          const goodPassword = await bcrypt.compare(password, user.password);
+          goodPassword ? done(null, user) : done(null, null);
+        }
+        done(null, null)
       } else {
         done(null, null);
       }
@@ -98,6 +103,23 @@ module.exports = {
       })
       .then(user => {
         response.json(userDataToShow(user));
-      });
+      })
+      .catch(() => response.json({error: "User doesn't exist"}));
+  },
+  deleteUserProfile: (request, response) => {
+    userSensitiveDataSchema.findOneAndDelete({_id: request.params.id}, () => response.json({message: `User has been deleted!`}))
+  },
+  editUserProfile: async (request, response) => {
+    try{
+      const user = await userSensitiveDataSchema.findOne({_id: request.params.id});
+      if(user){
+        const editedUser = await userSensitiveDataSchema.findByIdAndUpdate({_id: user._id}, request.body, { runValidators: true });
+        response.json(userDataToShow(editedUser));
+      }else{
+        response.status(404).json({error: "User doesn't exist!"});
+      }
+    }catch (error) {
+      response.status(500).json({error: error.message});
+    }
   }
 };

@@ -33,7 +33,7 @@ const permissions = {
   },
   [userRoleEnums.ADMIN]: {
     _id: false,
-    emailAddress: true,
+    emailAddress: false,
     userName: true,
     password: true,
     gender: true,
@@ -46,28 +46,20 @@ const permissions = {
   }
 };
 
-const isCurrentUserOwnerAccount = (
+const canUserAccessToProfile = (
   targetUserID,
   currentUserID,
-  dataToChange,
   currentUserRole,
-  next
-) => {
-  if (targetUserID == currentUserID) {
-    if (dataToChange.userRole && currentUserRole !== userRoleEnums.ADMIN) {
-      return;
-    }
-    next();
-  }
-};
+) => !!((targetUserID === currentUserID) || (currentUserRole === userRoleEnums.ADMIN));
 
-const hasCurrentUserPermission = (currentUserRole, dataToChange, next) => {
-  for (data in dataToChange) {
+
+const hasCurrentUserPermission = (currentUserRole, dataToChange) => {
+  for (let data in dataToChange) {
     if (!permissions[currentUserRole][data]) {
-      return;
+      return false;
     }
   }
-  next();
+  return true;
 };
 
 module.exports = {
@@ -77,14 +69,23 @@ module.exports = {
     const currentUserRole = request.user.userRole;
     const targetUserID = request.params.id;
     const dataToChange = request.body;
-    isCurrentUserOwnerAccount(
+    let permission = canUserAccessToProfile(
       targetUserID,
       currentUserID,
-      dataToChange,
       currentUserRole,
-      next
     );
-    hasCurrentUserPermission(currentUserRole, dataToChange, next);
-    response.status(403).json({ error: "Access denied!" });
+    if (permission){
+      if( currentUserRole === userRoleEnums.MODERATOR && currentUserID.toString() === targetUserID){
+        hasCurrentUserPermission(userRoleEnums.USER , dataToChange)
+            ? next()
+            : response.status(403).json({ error: "Your role given't you access to this data." });
+      }else{
+        hasCurrentUserPermission(currentUserRole, dataToChange)
+            ? next()
+            : response.status(403).json({ error: "Your role given't you access to this data." });
+      }
+    }else{
+      response.status(403).json({ error: "Access denied!" });
+    }
   }
 };

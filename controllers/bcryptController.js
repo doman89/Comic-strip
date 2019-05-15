@@ -13,16 +13,4 @@ module.exports = {
       });
     });
   },
-  checkPassword: (request, response, next) => {
-    bcrypt.compare(
-      request.body.password,
-      request.body.hash,
-      (error, result) => {
-        if (error) response.status(500).json({ error: error.message });
-        result
-          ? next()
-          : response.status(403).json({ error: "Password is not valid!" });
-      }
-    );
-  }
 };

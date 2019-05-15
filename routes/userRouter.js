@@ -9,13 +9,8 @@ router.get("/", userController.getAllUsers);
 
 router.get("/:id", userController.getUserProfile);
 
-router.put("/:id", (request, response) => {
-  console.log(request.payload);
-  response.send(`This endpoint will be to edit user: ${id}`);
-});
+router.put("/:id", roleController.checkPermissions, userController.editUserProfile);
 
-router.delete("/:id", roleController.checkPermissions, (request, response) => {
-  response.json({ error: "This endpoint will be for delete user" });
-});
+router.delete("/:id", roleController.checkPermissions, userController.deleteUserProfile);
 
 module.exports = router;
