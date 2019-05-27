@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const userSensitiveDataSchema = require("./models/userSensitiveDataSchema");
-const { userRoleEnums } = require("./../controllers/roleController");
+const userData = require("./models/userSensitiveDataSchema");
+const { userRole } = require("./../shared/enums/userRole");
 
 const configConnectOptions = {
   useNewUrlParser: true,
@@ -12,13 +12,14 @@ module.exports = () => {
   mongoose.connection
     .once("open", () => {
       console.log("Connection with database has been made.");
-      userSensitiveDataSchema.countDocuments({}, (err, cnt) => {
-        if (!cnt) {
-          const admin = new userSensitiveDataSchema({
+      userData.countDocuments({}, (error, counter) => {
+        if (!counter) {
+          const admin = new userData({
             emailAddress: "admin@admin.com",
             userName: "Admin",
             password: "Admin1234!",
-            userRole: userRoleEnums.ADMIN
+            userRole: userRole.ADMIN,
+            visiblePublic: false
           });
           admin.save().then(console.log("Admin account was created!"));
         }
